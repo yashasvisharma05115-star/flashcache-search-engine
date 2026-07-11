@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashCache Search Engine</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .search-box { width: 500px; text-align: center; }
+        h1 { font-size: 3rem; margin-bottom: 20px; color: #38bdf8; }
+        input { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #334155; border-radius: 30px; background: #1e293b; color: white; outline: none; box-sizing: border-box; }
+        input:focus { border-color: #38bdf8; }
+        .status { margin-top: 15px; font-weight: bold; font-size: 0.9rem; }
+        .hit { color: #4ade80; }
+        .miss { color: #f87171; }
+        .results { margin-top: 20px; text-align: left; background: #1e293b; padding: 15px; border-radius: 10px; display: none; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="search-box">
+    <h1>FlashCache</h1>
+    <input type="text" id="queryInput" placeholder="Search keywords (e.g., python, algorithms)..." onkeyup="executeSearch()">
+    <div id="statusLog" class="status"></div>
+    <div id="resultsDiv" class="results"></div>
+</div>
+
+<script>
+function executeSearch() {
+    let query = document.getElementById('queryInput').value;
+    let statusLog = document.getElementById('statusLog');
+    let resultsDiv = document.getElementById('resultsDiv');
+
+    if(query.trim().length === 0) {
+        statusLog.innerHTML = "";
+        resultsDiv.style.display = "none";
+        return;
+    }
+
+    fetch(`/search?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.results && data.results.length > 0) {
+                statusLog.innerHTML = `<span class="${data.status === 'CACHE HIT' ? 'hit' : 'miss'}">[${data.status}] Instant response optimized</span>`;
+                resultsDiv.innerHTML = `<strong>Matching Documents found:</strong><br>${data.results.join(', ')}`;
+                resultsDiv.style.display = "block";
+            } else {
+                statusLog.innerHTML = "<span class='miss'>[NOT FOUND] No documents match</span>";
+                resultsDiv.style.display = "none";
+            }
+        });
+}
+</script>
+</body>
+</html>
